@@ -1,5 +1,6 @@
 # Claude Limit Tracker
 
+![image](./Tik-Tokens.png)
 A local-first browser extension that shows Claude usage limits in the toolbar.
 
 Claude Limit Tracker displays your 5-hour and 7-day Claude usage, reset countdowns, warning states, and local notifications so you know when to slow down, wait for reset, or resume work.
@@ -82,23 +83,23 @@ After setup, the Claude tab does not need to stay open. The extension can keep r
 
 The toolbar badge gives a quick status:
 
-| Badge | Meaning |
-|---|---|
-| `4h` | Reset in about 4 hours |
-| `1h` | Reset in about 1 hour |
-| `42m` | Reset in 42 minutes |
-| `95` | Critical usage level |
-| `SET` | Setup needed |
+| Badge | Meaning                      |
+| ----- | ---------------------------- |
+| `4h`  | Reset in about 4 hours       |
+| `1h`  | Reset in about 1 hour        |
+| `42m` | Reset in 42 minutes          |
+| `95`  | Critical usage level         |
+| `SET` | Setup needed                 |
 | `ERR` | Sync failed or login expired |
 
 Badge colors:
 
-| Color | Meaning |
-|---|---|
-| Green | Safe |
-| Orange | Warning |
-| Red | Critical |
-| Gray | Unknown, setup needed, or logged out |
+| Color  | Meaning                              |
+| ------ | ------------------------------------ |
+| Green  | Safe                                 |
+| Orange | Warning                              |
+| Red    | Critical                             |
+| Gray   | Unknown, setup needed, or logged out |
 
 Open the popup to see:
 
@@ -124,11 +125,11 @@ Thresholds can be changed in settings.
 
 Default threshold behavior:
 
-| Event | Default |
-|---|---:|
-| Session warning | 85% |
-| Session final warning | 95% |
-| Weekly critical warning | 95% |
+| Event                   | Default |
+| ----------------------- | ------: |
+| Session warning         |     85% |
+| Session final warning   |     95% |
+| Weekly critical warning |     95% |
 
 You can also enable quiet mode, disable reset notifications, disable weekly warnings, or mute warnings until the next reset.
 

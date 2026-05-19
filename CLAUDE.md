@@ -1,4 +1,4 @@
-# Claude Limit Tracker — Claude Code Implementation Guide
+# Claude Limit Tracker - Claude Code Implementation Guide
 
 This file is the working instruction set for Claude Code while building the repository. Follow it as the source of truth for planning, implementation, commits, and documentation style.
 
@@ -251,8 +251,8 @@ fetch(`https://claude.ai/api/organizations/${orgId}/usage`, {
   method: 'GET',
   credentials: 'include',
   headers: {
-    accept: 'application/json'
-  }
+    accept: 'application/json',
+  },
 });
 ```
 

@@ -4,7 +4,16 @@
       "PowerShell(npm *)",
       "Bash(gh auth *)",
       "PowerShell(gh auth *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(winget list *)",
+      "PowerShell(gh *)",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
