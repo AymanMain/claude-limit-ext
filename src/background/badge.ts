@@ -25,7 +25,25 @@ export async function updateBadge(usage: ClaudeUsageState): Promise<void> {
 
   let text: string;
 
-  if (mode === 'usage-percent') {
+  if (mode === 'percent-first') {
+    // show % when not full; switch to time-until-reset when full (>=95) or weekly danger
+    const isFull = isWeeklyDanger(sd) || (fh !== null && fh >= 95);
+    if (isFull) {
+      const ms = msUntilReset(usage.fiveHour.resetsAt);
+      if (ms > 0) {
+        const mins = Math.ceil(ms / 60_000);
+        text = mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h`;
+      } else {
+        text = fh !== null ? `${Math.round(fh)}` : '—';
+      }
+    } else {
+      if (isWeeklyDanger(sd)) {
+        text = `${Math.round(sd!)}`;
+      } else {
+        text = fh !== null ? `${Math.round(fh)}` : '—';
+      }
+    }
+  } else if (mode === 'usage-percent') {
     if (isWeeklyDanger(sd)) {
       text = `${Math.round(sd!)}`;
     } else {

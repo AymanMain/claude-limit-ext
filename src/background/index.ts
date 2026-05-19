@@ -38,6 +38,7 @@ chrome.runtime.onMessage.addListener(
     if (msg.type === 'SETTINGS_UPDATED') {
       getSettings()
         .then((s) => updateAlarmInterval(s.syncIntervalMinutes))
+        .then(() => refreshUsage())
         .then(() => sendResponse({ ok: true }));
       return true;
     }

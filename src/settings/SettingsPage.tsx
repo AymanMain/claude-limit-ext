@@ -122,9 +122,10 @@ export function SettingsPage() {
                   setLocal({ ...settings, badgeMode: e.target.value as Settings['badgeMode'] })
                 }
               >
-                <option value="smart">Smart</option>
-                <option value="reset-time">Reset time</option>
-                <option value="usage-percent">Usage percent</option>
+                <option value="percent-first">% until full, then time to reset</option>
+                <option value="smart">Smart (time until critical, % when critical)</option>
+                <option value="reset-time">Always reset time</option>
+                <option value="usage-percent">Always usage %</option>
               </select>
             </div>
 

@@ -33,7 +33,7 @@ export type SnoozeState = {
   mutedUntilResetAt?: string | null;
 };
 
-export type BadgeMode = 'smart' | 'reset-time' | 'usage-percent';
+export type BadgeMode = 'percent-first' | 'smart' | 'reset-time' | 'usage-percent';
 export type Theme = 'system' | 'light' | 'dark';
 export type SyncInterval = 2 | 5 | 10 | 15;
 
@@ -59,7 +59,7 @@ export type Settings = {
 
 export const DEFAULT_SETTINGS: Settings = {
   syncIntervalMinutes: 2,
-  badgeMode: 'smart',
+  badgeMode: 'percent-first',
   theme: 'system',
   compactPopup: false,
   notifications: {
