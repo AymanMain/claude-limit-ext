@@ -21,6 +21,55 @@ type PopupState = {
   snooze: SnoozeState;
 };
 
+// Live countdown that ticks every second
+function useCountdown(resetsAt: string | null): number {
+  const [ms, setMs] = useState(() => msUntilReset(resetsAt));
+  useEffect(() => {
+    setMs(msUntilReset(resetsAt));
+    if (!resetsAt) return;
+    const id = setInterval(() => setMs(msUntilReset(resetsAt)), 1000);
+    return () => clearInterval(id);
+  }, [resetsAt]);
+  return ms;
+}
+
+// Circular arc progress indicator
+function RingProgress({
+  pct,
+  color,
+  children,
+}: {
+  pct: number;
+  color: string;
+  children?: React.ReactNode;
+}) {
+  const r = 52;
+  const circ = 2 * Math.PI * r;
+  const fill = Math.min(100, Math.max(0, pct));
+  const dash = (fill / 100) * circ;
+
+  return (
+    <div className="ring-wrap">
+      <svg className="ring-svg" width="136" height="136" viewBox="0 0 136 136">
+        <circle cx="68" cy="68" r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="11" />
+        <circle
+          cx="68"
+          cy="68"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="11"
+          strokeDasharray={`${dash} ${circ}`}
+          strokeLinecap="round"
+          transform="rotate(-90 68 68)"
+          style={{ transition: 'stroke-dasharray 0.8s ease, stroke 0.4s ease' }}
+        />
+      </svg>
+      <div className="ring-center">{children}</div>
+    </div>
+  );
+}
+
 export function Popup() {
   const [data, setData] = useState<PopupState | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -76,7 +125,10 @@ export function Popup() {
     return (
       <div className="popup">
         <PopupHeader />
-        <div className="popup-body popup-body--loading">Loading…</div>
+        <div className="popup-body popup-body--loading">
+          <span className="loading-dot" />
+          Loading
+        </div>
       </div>
     );
   }
@@ -87,10 +139,15 @@ export function Popup() {
   const hasError = Boolean(usage?.lastError);
   const hasData = fh !== null || sd !== null;
 
-  let view: 'setup' | 'error' | 'weekly-danger' | 'critical' | 'normal' = 'normal';
+  // "Waiting" = session capped and reset is coming
+  const fhResetMs = msUntilReset(usage?.fiveHour.resetsAt ?? null);
+  const isWaiting = fh !== null && fh >= 95 && fhResetMs > 0;
+
+  let view: 'setup' | 'error' | 'weekly-danger' | 'waiting' | 'critical' | 'normal' = 'normal';
   if (!orgId) view = 'setup';
   else if (hasError && !hasData) view = 'error';
   else if (isWeeklyDanger(sd)) view = 'weekly-danger';
+  else if (isWaiting) view = 'waiting';
   else if (isSessionCritical(fh)) view = 'critical';
 
   return (
@@ -99,7 +156,11 @@ export function Popup() {
 
       <div className="popup-body">
         {view === 'setup' && (
-          <SetupView onDetect={handleDetect} onOpenClaude={() => chrome.tabs.create({ url: 'https://claude.ai' })} loading={refreshing} />
+          <SetupView
+            onDetect={handleDetect}
+            onOpenClaude={() => chrome.tabs.create({ url: 'https://claude.ai' })}
+            loading={refreshing}
+          />
         )}
 
         {view === 'error' && (
@@ -116,6 +177,16 @@ export function Popup() {
             utilization={sd!}
             resetsAt={usage.sevenDay.resetsAt}
             onMute={handleMuteWeekly}
+            onRefresh={handleRefresh}
+            loading={refreshing}
+            usage={usage}
+          />
+        )}
+
+        {view === 'waiting' && usage && (
+          <WaitingView
+            usage={usage}
+            onMute={handleMuteUntilReset}
             onRefresh={handleRefresh}
             loading={refreshing}
           />
@@ -146,7 +217,10 @@ export function Popup() {
 function PopupHeader() {
   return (
     <div className="popup-header">
-      <span className="popup-header__title">Claude Limit Tracker</span>
+      <div className="popup-header__left">
+        <div className="popup-header__dot" />
+        <span className="popup-header__title">Claude Limit Tracker</span>
+      </div>
       <button
         className="btn-icon"
         onClick={() => chrome.runtime.openOptionsPage()}
@@ -171,7 +245,14 @@ function SetupView({
   loading: boolean;
 }) {
   return (
-    <div className="view">
+    <div className="view view--centered">
+      <div className="setup-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      </div>
       <div className="view__title">Setup needed</div>
       <p className="view__body">
         Open Claude once to let the extension detect your organization ID, then click Detect.
@@ -202,6 +283,13 @@ function ErrorView({
   const isAuth = usage?.lastStatusCode === 401 || usage?.lastStatusCode === 403;
   return (
     <div className="view view--error">
+      <div className="error-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
       <div className="view__title">Sync failed</div>
       <p className="view__body">
         {isAuth
@@ -223,6 +311,66 @@ function ErrorView({
   );
 }
 
+function WaitingView({
+  usage,
+  onMute,
+  onRefresh,
+  loading,
+}: {
+  usage: ClaudeUsageState;
+  onMute: () => void;
+  onRefresh: () => void;
+  loading: boolean;
+}) {
+  const fh = usage.fiveHour.utilization ?? 0;
+  const sd = usage.sevenDay.utilization;
+  const ms = useCountdown(usage.fiveHour.resetsAt);
+  const isMaxed = fh >= 100;
+
+  return (
+    <div className="view view--waiting">
+      <div className="view__title view__title--center">
+        {isMaxed ? 'Session limit reached' : 'Session nearly full'}
+      </div>
+
+      <RingProgress pct={fh} color="#ef4444">
+        <span className="ring-pct" style={{ color: '#ef4444' }}>{Math.round(fh)}%</span>
+        <span className="ring-label">5-hour</span>
+      </RingProgress>
+
+      {ms > 0 ? (
+        <div className="countdown-block">
+          <div className="countdown__time">{formatCountdown(ms)}</div>
+          <div className="countdown__label">until reset</div>
+        </div>
+      ) : (
+        <div className="countdown-block">
+          <div className="countdown__time countdown__time--reset">Resetting…</div>
+        </div>
+      )}
+
+      {sd !== null && (
+        <div className="view__weekly-line">
+          <span className={sd >= 95 ? 'text-red' : sd >= 80 ? 'text-orange' : 'text-muted'}>
+            7-day: {formatPct(sd)}
+          </span>
+        </div>
+      )}
+
+      <StatusFooter usage={usage} />
+
+      <div className="btn-row">
+        <button className="btn btn--ghost" onClick={onMute}>
+          Mute until reset
+        </button>
+        <button className="btn btn--primary" onClick={onRefresh} disabled={loading}>
+          {loading ? 'Refreshing…' : 'Refresh now'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CriticalView({
   usage,
   onMute,
@@ -234,21 +382,34 @@ function CriticalView({
   onRefresh: () => void;
   loading: boolean;
 }) {
-  const fh = usage.fiveHour.utilization;
+  const fh = usage.fiveHour.utilization ?? 0;
   const sd = usage.sevenDay.utilization;
-  const ms = msUntilReset(usage.fiveHour.resetsAt);
+  const ms = useCountdown(usage.fiveHour.resetsAt);
 
   return (
     <div className="view view--critical">
-      <div className="view__title">Claude session is critical</div>
-      <div className="view__big-pct">{formatPct(fh)}</div>
-      {ms > 0 && <div className="view__sub">Reset in {formatCountdown(ms)}</div>}
+      <div className="view__title view__title--center">Claude session is critical</div>
+
+      <RingProgress pct={fh} color="#ef4444">
+        <span className="ring-pct" style={{ color: '#ef4444' }}>{Math.round(fh)}%</span>
+        <span className="ring-label">5-hour</span>
+      </RingProgress>
+
+      {ms > 0 && (
+        <div className="countdown-block">
+          <div className="countdown__time">{formatCountdown(ms)}</div>
+          <div className="countdown__label">until reset</div>
+        </div>
+      )}
+
       {sd !== null && sd < 95 && (
-        <div className="view__weekly-safe">Weekly usage is safe at {formatPct(sd)}.</div>
+        <div className="view__weekly-line">
+          <span className="text-muted">7-day usage: {formatPct(sd)}</span>
+        </div>
       )}
-      {usage.lastSyncedAt && (
-        <div className="view__sync-time">Last sync: <StatusFooter usage={usage} /></div>
-      )}
+
+      <StatusFooter usage={usage} />
+
       <div className="btn-row">
         <button className="btn btn--ghost" onClick={onMute}>
           Mute until reset
