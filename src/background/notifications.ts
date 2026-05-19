@@ -1,6 +1,9 @@
 import type { ClaudeUsageState, NotificationMemory, Settings, SnoozeState } from '../core/usageModel';
 import { formatCountdown, msUntilReset } from '../core/countdown';
 
+// Module-level dedup: reset on service worker restart (acceptable for v0.1)
+let lastSyncFailedNotifAt = 0;
+
 function isQuietHours(settings: Settings): boolean {
   if (!settings.notifications.quietHoursEnabled) return false;
   const hour = new Date().getHours();
@@ -20,7 +23,7 @@ function isSnoozed(snooze: SnoozeState, resetAt: string | null): boolean {
 function send(id: string, title: string, message: string): void {
   chrome.notifications.create(`claude-limit-${id}`, {
     type: 'basic',
-    iconUrl: 'icons/icon128.png',
+    iconUrl: chrome.runtime.getURL('icons/icon128.png'),
     title,
     message,
     priority: 2,
@@ -44,23 +47,27 @@ export function evaluateNotifications(
   const sdResetAt = usage.sevenDay.resetsAt;
   const snoozed = isSnoozed(snooze, fhResetAt);
 
-  // Session warning
-  if (!quiet && !snoozed && fh !== null && fh >= n.sessionWarningPct && fh < n.sessionCriticalPct) {
+  // Session warning — fires if in warning range OR if jumped past it
+  if (!quiet && !snoozed && fh !== null && fh >= n.sessionWarningPct) {
     const key = fhResetAt ?? 'none';
     if (updated.notifiedSessionWarningForResetAt !== key) {
       updated.notifiedSessionWarningForResetAt = key;
-      send('session-warning', 'Claude session warning', `Your 5-hour usage is above ${n.sessionWarningPct}%.`);
+      if (fh < n.sessionCriticalPct) {
+        send('session-warning', 'Claude session warning', `5-hour usage is above ${n.sessionWarningPct}%.`);
+      }
     }
   }
 
   // Session critical
-  if (!quiet && !snoozed && fh !== null && fh >= n.sessionCriticalPct && fh < n.sessionFinalPct) {
+  if (!quiet && !snoozed && fh !== null && fh >= n.sessionCriticalPct) {
     const key = fhResetAt ?? 'none';
     if (updated.notifiedSessionCriticalForResetAt !== key) {
       updated.notifiedSessionCriticalForResetAt = key;
-      const ms = msUntilReset(fhResetAt);
-      const cd = ms > 0 ? ` Reset in ${formatCountdown(ms)}.` : '';
-      send('session-critical', 'Claude session critical', `Your 5-hour usage is above ${n.sessionCriticalPct}%.${cd}`);
+      if (fh < n.sessionFinalPct) {
+        const ms = msUntilReset(fhResetAt);
+        const cd = ms > 0 ? ` Reset in ${formatCountdown(ms)}.` : '';
+        send('session-critical', 'Claude session critical', `5-hour usage is above ${n.sessionCriticalPct}%.${cd}`);
+      }
     }
   }
 
@@ -71,16 +78,18 @@ export function evaluateNotifications(
       updated.notifiedSessionFinalForResetAt = key;
       const ms = msUntilReset(fhResetAt);
       const cd = ms > 0 ? ` Reset in ${formatCountdown(ms)}.` : '';
-      send('session-final', 'Claude session critical', `Your 5-hour usage is above ${n.sessionFinalPct}%.${cd}`);
+      send('session-final', 'Claude session critical', `5-hour usage is above ${n.sessionFinalPct}%.${cd}`);
     }
   }
 
   // Weekly warning
-  if (!quiet && !snoozed && n.weeklyEnabled && sd !== null && sd >= n.weeklyWarningPct && sd < n.weeklyCriticalPct) {
+  if (!quiet && !snoozed && n.weeklyEnabled && sd !== null && sd >= n.weeklyWarningPct) {
     const key = sdResetAt ?? 'none';
     if (updated.notifiedWeeklyWarningForResetAt !== key) {
       updated.notifiedWeeklyWarningForResetAt = key;
-      send('weekly-warning', 'Claude weekly warning', `Your 7-day usage is above ${n.weeklyWarningPct}%.`);
+      if (sd < n.weeklyCriticalPct) {
+        send('weekly-warning', 'Claude weekly warning', `7-day usage is above ${n.weeklyWarningPct}%.`);
+      }
     }
   }
 
@@ -89,7 +98,11 @@ export function evaluateNotifications(
     const key = sdResetAt ?? 'none';
     if (updated.notifiedWeeklyCriticalForResetAt !== key) {
       updated.notifiedWeeklyCriticalForResetAt = key;
-      send('weekly-critical', 'Claude weekly warning', `Your 7-day usage is above ${n.weeklyCriticalPct}%. Be careful with long Claude Code sessions.`);
+      send(
+        'weekly-critical',
+        'Claude weekly warning',
+        `7-day usage is above ${n.weeklyCriticalPct}%. Be careful with long Claude Code sessions.`,
+      );
     }
   }
 
@@ -102,7 +115,7 @@ export function evaluateNotifications(
       const key = fhResetAt ?? 'none';
       if (updated.notifiedResetForResetAt !== key) {
         updated.notifiedResetForResetAt = key;
-        send('reset', 'Claude reset detected', 'Your 5-hour usage window appears to have reset.');
+        send('reset', 'Claude reset detected', 'Your 5-hour usage window has reset.');
       }
     }
   }
@@ -112,5 +125,9 @@ export function evaluateNotifications(
 
 export function notifySyncFailed(settings: Settings): void {
   if (!settings.notifications.syncErrorEnabled) return;
+  const now = Date.now();
+  // Suppress repeat alerts within 30 minutes
+  if (now - lastSyncFailedNotifAt < 30 * 60_000) return;
+  lastSyncFailedNotifAt = now;
   send('sync-failed', 'Claude sync failed', 'Open Claude and log in again.');
 }
