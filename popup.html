@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Limit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-text">CLAUDE TRACKER</div>
+      <button class="icon-btn" id="settingsToggle" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main View -->
+    <div class="main-view" id="mainView">
+
+      <!-- Gauge -->
+      <div class="gauge-container">
+        <svg class="gauge-svg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer glow ring (decorative) -->
+          <circle class="glow-ring" cx="110" cy="110" r="100"/>
+
+          <!-- Background track -->
+          <circle class="track" cx="110" cy="110" r="90"
+            fill="none" stroke-width="10"
+            stroke-dasharray="565.49" stroke-dashoffset="0"
+            transform="rotate(-90 110 110)"/>
+
+          <!-- Progress arc -->
+          <circle class="progress-arc" id="progressArc" cx="110" cy="110" r="90"
+            fill="none" stroke-width="10"
+            stroke-dasharray="565.49" stroke-dashoffset="565.49"
+            stroke-linecap="round"
+            transform="rotate(-90 110 110)"/>
+
+          <!-- Week arc (inner, thinner) -->
+          <circle class="week-arc" id="weekArc" cx="110" cy="110" r="78"
+            fill="none" stroke-width="5"
+            stroke-dasharray="490.09" stroke-dashoffset="490.09"
+            stroke-linecap="round"
+            transform="rotate(-90 110 110)"/>
+
+          <!-- Claude Logo SVG (center) -->
+          <g transform="translate(110, 105)" id="claudeLogoGroup">
+            <!-- Stylized Claude mark: abstract radiating shape -->
+            <g class="claude-mark" transform="scale(1.6)">
+              <!-- Central body -->
+              <ellipse cx="0" cy="0" rx="10" ry="12" fill="currentColor" opacity="0.15"/>
+              <!-- Radiating segments forming the Claude-like abstract mark -->
+              <path d="M0,-18 C4,-14 6,-8 5,0 C4,8 2,13 0,18 C-2,13 -4,8 -5,0 C-6,-8 -4,-14 0,-18Z" fill="currentColor"/>
+              <path d="M-18,0 C-14,-4 -8,-6 0,-5 C8,-4 13,-2 18,0 C13,2 8,4 0,5 C-8,6 -14,4 -18,0Z" fill="currentColor"/>
+              <path d="M-12.7,-12.7 C-9,-10 -6,-5 -5,0 C-4,5 -5,10 -7,14 C-10,11 -13,7 -14,3 C-16,-2 -15,-8 -12.7,-12.7Z" fill="currentColor" opacity="0.7"/>
+              <path d="M12.7,-12.7 C15,-8 16,-2 14,3 C13,7 10,11 7,14 C5,10 4,5 5,0 C6,-5 9,-10 12.7,-12.7Z" fill="currentColor" opacity="0.7"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- Center overlay info -->
+        <div class="center-overlay">
+          <div class="time-display" id="timeDisplay">—</div>
+          <div class="time-label" id="timeLabel">until reset</div>
+          <div class="pct-display" id="pctDisplay">0%</div>
+        </div>
+      </div>
+
+      <!-- Stats Panel -->
+      <div class="stats-panel">
+        <div class="stat-block" id="sessionBlock">
+          <div class="stat-header">
+            <span class="stat-label">Session</span>
+            <span class="stat-dot" id="sessionDot"></span>
+          </div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar">
+              <div class="stat-bar-fill session-fill" id="sessionBarFill"></div>
+            </div>
+          </div>
+          <div class="stat-nums">
+            <span class="stat-used" id="sessionUsed">0</span>
+            <span class="stat-sep">/</span>
+            <span class="stat-total" id="sessionTotal">45</span>
+            <span class="stat-unit">msgs</span>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-block" id="weekBlock">
+          <div class="stat-header">
+            <span class="stat-label">This Week</span>
+            <span class="stat-dot week-dot" id="weekDot"></span>
+          </div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar">
+              <div class="stat-bar-fill week-fill" id="weekBarFill"></div>
+            </div>
+          </div>
+          <div class="stat-nums">
+            <span class="stat-used" id="weekUsed">0</span>
+            <span class="stat-sep">/</span>
+            <span class="stat-total" id="weekTotal">300</span>
+            <span class="stat-unit">msgs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning Banner -->
+      <div class="warning-banner" id="warningBanner" style="display:none">
+        <span class="warning-icon">⚠</span>
+        <span class="warning-text" id="warningText"></span>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button class="action-btn" id="addMsgBtn" title="Manually log a message">
+          +1 msg
+        </button>
+        <button class="action-btn" id="openClaudeBtn" title="Open Claude">
+          Open Claude ↗
+        </button>
+        <button class="action-btn danger" id="resetSessionBtn" title="Reset session counter">
+          Reset session
+        </button>
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel" style="display:none">
+      <div class="settings-scroll">
+        <div class="settings-section">
+          <div class="settings-label">Plan</div>
+          <select class="settings-select" id="planSelect">
+            <option value="free">Free (10 msgs / session)</option>
+            <option value="pro" selected>Pro (45 msgs / 5h)</option>
+            <option value="team">Team (50 msgs / 5h)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="settings-section" id="customSection" style="display:none">
+          <div class="settings-row">
+            <div class="settings-label">Session limit (msgs)</div>
+            <input class="settings-input" type="number" id="sessionLimitInput" min="1" max="9999" value="45">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Session window (hours)</div>
+            <input class="settings-input" type="number" id="sessionWindowInput" min="1" max="24" value="5">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Weekly limit (msgs)</div>
+            <input class="settings-input" type="number" id="weekLimitInput" min="1" max="99999" value="300">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Notify me at</div>
+          <div class="threshold-grid">
+            <label class="threshold-chip" id="t50">
+              <input type="checkbox" value="50" checked> 50%
+            </label>
+            <label class="threshold-chip" id="t75">
+              <input type="checkbox" value="75" checked> 75%
+            </label>
+            <label class="threshold-chip" id="t90">
+              <input type="checkbox" value="90" checked> 90%
+            </label>
+            <label class="threshold-chip" id="t95">
+              <input type="checkbox" value="95" checked> 95% ⚠
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Notify on reset</div>
+          <label class="toggle-row">
+            <input type="checkbox" id="notifyResetToggle" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Session reset alert</span>
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="notifyWeekResetToggle" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Weekly reset alert</span>
+          </label>
+        </div>
+
+        <div class="settings-actions">
+          <button class="save-btn" id="saveSettingsBtn">Save Settings</button>
+          <button class="reset-all-btn" id="resetAllBtn">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
