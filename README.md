@@ -11,10 +11,12 @@ It is designed for Claude Web and Claude Code users who want a small statusline-
 
 ## Features
 
-- Toolbar badge with reset time or critical usage state.
-- 5-hour usage tracking.
+- Toolbar badge with reset time, usage percent, or smart switching.
+- 5-hour session usage tracking.
 - 7-day usage tracking.
-- Reset countdowns.
+- Live reset countdowns that tick every second.
+- Circular arc progress ring for critical and waiting states.
+- "Waiting for reset" view with prominent countdown when session is maxed.
 - Manual refresh button.
 - Background refresh after setup.
 - Warning notifications for high usage.
@@ -39,8 +41,8 @@ It does not ask for API keys, cookies, session tokens, or account credentials.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/claude-limit-tracker.git
-cd claude-limit-tracker
+git clone https://github.com/AymanMain/claude-limit-ext.git
+cd claude-limit-ext
 ```
 
 ### 2. Install dependencies
@@ -101,13 +103,19 @@ Badge colors:
 | Red    | Critical                             |
 | Gray   | Unknown, setup needed, or logged out |
 
+The badge mode can be changed in settings:
+
+- **Smart** — shows usage when critical, reset time otherwise.
+- **Reset time** — always shows time until next session reset.
+- **Usage percent** — always shows current usage percentage.
+
 Open the popup to see:
 
-- 5-hour usage percentage.
-- 5-hour reset countdown.
+- 5-hour usage percentage and arc progress ring.
+- 5-hour reset countdown (live, ticking every second when in waiting state).
 - 7-day usage percentage.
 - 7-day reset countdown.
-- Last sync time.
+- Last sync time and freshness indicator.
 - Current data source.
 - Warning or error states.
 
@@ -269,6 +277,40 @@ npm run lint
 ## Project status
 
 The project is built around Claude web usage data available to the signed-in user. The endpoint is unofficial and may change. The extension includes debug and fallback flows to make breakage easier to diagnose.
+
+## Changelog
+
+### v0.1.1
+
+- **Badge modes now work.** All three badge display modes (smart, reset-time, usage-percent) apply correctly. Previously `badgeMode` setting was ignored and smart mode always ran.
+- **Notification icon fixed.** Chrome MV3 service workers require `chrome.runtime.getURL()` for notification icon paths. Previously the icon URL was malformed and notification icons did not render.
+- **Sync-failed notification deduplication.** Repeated auth failures no longer spam notifications. Re-alerts after 30 minutes.
+- **Waiting-for-reset view.** When the 5-hour session hits 95%+ with an upcoming reset, the popup switches to a focused countdown view instead of a static critical view.
+- **Circular arc progress ring.** Critical, waiting, and weekly danger views now use a circular SVG progress indicator centered in the popup.
+- **Live ticking countdown.** The reset countdown in critical and waiting views updates every second.
+- **Pulsing badge dot.** The header indicator pulses red when session is critical or waiting.
+- **Taller progress bars and colored card borders** in normal view usage cards.
+
+### v0.1.0
+
+Initial release.
+
+- Background refresh with `chrome.alarms`.
+- 5-hour and 7-day usage tracking.
+- Toolbar badge with smart mode.
+- Popup with usage cards, footer, and action buttons.
+- Notification engine with deduplication.
+- Quiet mode and snooze-until-reset.
+- Weekly danger mode.
+- Settings, debug, and privacy panels.
+- Local-only storage.
+
+## Contact
+
+Questions, bug reports, or collaboration:
+
+- GitHub: [AymanMain](https://github.com/AymanMain)
+- Email: [aymanelkarroussi@gmail.com](mailto:aymanelkarroussi@gmail.com)
 
 ## Disclaimer
 
