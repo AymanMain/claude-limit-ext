@@ -22,6 +22,9 @@ export default defineConfig({
     copyIconsPlugin,
   ],
   publicDir: false,
+  build: {
+    modulePreload: { polyfill: false },
+  },
   test: {
     environment: 'node',
     globals: true,
