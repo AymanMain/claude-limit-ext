@@ -1,33 +1,5 @@
 import { detectOrgIdCandidates, validateOrgId, extractOrgIdFromUrl } from './detectOrgId';
 
-// Injected into page context to intercept fetch calls before the SPA makes them.
-// Uses postMessage to pass org IDs back to content script context.
-const PAGE_SCRIPT = `(function() {
-  if (window.__claudeOrgInterceptInstalled) return;
-  window.__claudeOrgInterceptInstalled = true;
-  var UUID_PAT = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-  var ORG_PATS = [
-    /\\/api\\/organizations\\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
-    /\\/api\\/bootstrap\\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\\/current_user_access/i,
-  ];
-  const orig = window.fetch;
-  window.fetch = function(input) {
-    var url = typeof input === 'string' ? input : (input instanceof URL ? input.href : (input && input.url) || '');
-    for (var i = 0; i < ORG_PATS.length; i++) {
-      var m = url.match(ORG_PATS[i]);
-      if (m) { window.postMessage({ __claudeOrgId: m[1] }, '*'); break; }
-    }
-    return orig.apply(this, arguments);
-  };
-})();`;
-
-function injectPageScript(): void {
-  const s = document.createElement('script');
-  s.textContent = PAGE_SCRIPT;
-  (document.head || document.documentElement).appendChild(s);
-  s.remove();
-}
-
 let savedOrgId: string | null = null;
 
 async function saveOrgId(orgId: string): Promise<void> {
@@ -67,9 +39,6 @@ chrome.runtime.onMessage.addListener((msg: { type: string }) => {
     tryDetect();
   }
 });
-
-// Inject intercept immediately, then try passive detection after load
-injectPageScript();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => setTimeout(tryDetect, 1500));
