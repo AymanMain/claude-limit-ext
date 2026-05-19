@@ -1,18 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Claude Limit Tracker",
-  "version": "1.0.0",
-  "description": "Track your Claude usage limits with smart notifications and a live timer.",
+  "version": "0.1.0",
+  "description": "Track Claude usage limits — 5-hour and 7-day windows, reset countdowns, and local alerts.",
   "permissions": [
     "storage",
     "notifications",
-    "alarms"
+    "alarms",
+    "tabs",
+    "activeTab"
   ],
   "host_permissions": [
     "https://claude.ai/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/index.ts",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup.html",
@@ -26,7 +29,7 @@
   "content_scripts": [
     {
       "matches": ["https://claude.ai/*"],
-      "js": ["content.js"],
+      "js": ["src/content/index.ts"],
       "run_at": "document_idle"
     }
   ],
@@ -36,5 +39,5 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "options_page": "options.html"
+  "options_page": "settings.html"
 }
