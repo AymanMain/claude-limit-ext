@@ -1,4 +1,8 @@
 const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+const ORG_PATH_RES = [
+  /\/api\/organizations\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+  /\/api\/bootstrap\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/current_user_access/i,
+];
 
 function extractUUIDs(text: string): string[] {
   return [...new Set(text.match(UUID_RE) ?? [])];
@@ -33,11 +37,41 @@ function scanFromMeta(): string[] {
   return [...new Set(uuids)];
 }
 
+function scanFromStorage(): string[] {
+  const uuids: string[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      uuids.push(...extractUUIDs(localStorage.getItem(key) ?? ''));
+    }
+  } catch {}
+  try {
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!key) continue;
+      uuids.push(...extractUUIDs(sessionStorage.getItem(key) ?? ''));
+    }
+  } catch {}
+  return [...new Set(uuids)];
+}
+
+function scanFromWindowData(): string[] {
+  const uuids: string[] = [];
+  try {
+    const nextData = (window as unknown as Record<string, unknown>).__NEXT_DATA__;
+    if (nextData) uuids.push(...extractUUIDs(JSON.stringify(nextData)));
+  } catch {}
+  return [...new Set(uuids)];
+}
+
 export function detectOrgIdCandidates(): string[] {
   const all = [
     ...scanFromUrl(),
-    ...scanFromScripts(),
+    ...scanFromStorage(),
+    ...scanFromWindowData(),
     ...scanFromLinks(),
+    ...scanFromScripts(),
     ...scanFromMeta(),
   ];
   return [...new Set(all)];
@@ -60,4 +94,12 @@ export async function validateOrgId(orgId: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export function extractOrgIdFromUrl(url: string): string | null {
+  for (const re of ORG_PATH_RES) {
+    const m = url.match(re);
+    if (m) return m[1];
+  }
+  return null;
 }
