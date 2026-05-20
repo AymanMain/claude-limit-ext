@@ -3,6 +3,6 @@ dist/
 *.zip
 .DS_Store
 CLAUDE.md
-
+.claude/
 STORE_READINESS.md
 CWS_SUBMISSION.md
