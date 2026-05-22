@@ -36,6 +36,17 @@ The extension stores normalized usage data locally and updates the toolbar badge
 
 It does not ask for API keys, cookies, session tokens, or account credentials.
 
+## Browser support
+
+Works on any Chromium-based browser.
+
+| Browser | Notes |
+| ------- | ----- |
+| Chrome | Primary target |
+| Edge | Same build |
+| Brave | Same build |
+| Opera | Same build |
+
 ## Installation
 
 ### 1. Clone the repository
@@ -51,25 +62,46 @@ cd claude-limit-ext
 npm install
 ```
 
-### 3. Build the extension
+### 3. Build
 
 ```bash
 npm run build
 ```
 
-The build output will be created in:
+Output: `dist/`
 
-```text
-dist/
-```
+### 4. Load the extension
 
-### 4. Load it in Chrome or Chromium
+#### Chrome
 
 1. Open `chrome://extensions`.
+2. Enable **Developer mode** (top right).
+3. Click **Load unpacked**.
+4. Select the `dist/` folder.
+5. Pin the extension to your toolbar.
+
+#### Edge
+
+1. Open `edge://extensions`.
+2. Enable **Developer mode** (bottom left).
+3. Click **Load unpacked**.
+4. Select the `dist/` folder.
+5. Pin the extension to your toolbar.
+
+#### Brave
+
+1. Open `brave://extensions`.
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
 4. Select the `dist/` folder.
 5. Pin the extension to your toolbar.
+
+#### Opera
+
+1. Open `opera://extensions`.
+2. Enable **Developer mode**.
+3. Click **Load unpacked** (or drag-and-drop the `dist/` folder).
+4. Pin the extension to your toolbar.
 
 ## First setup
 
@@ -256,7 +288,7 @@ Start development build:
 npm run dev
 ```
 
-Build extension:
+Build:
 
 ```bash
 npm run build
