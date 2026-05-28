@@ -1,6 +1,8 @@
 # Claude Limit Tracker
 
 ![Claude Limit Tracker](./docs/banner.png)
+![CI](https://github.com/AymanMain/claude-limit-ext/actions/workflows/ci.yml/badge.svg)
+
 A local-first browser extension that shows Claude usage limits in the toolbar.
 
 Claude Limit Tracker displays your 5-hour and 7-day Claude usage, reset countdowns, warning states, and local notifications so you know when to slow down, wait for reset, or resume work.
