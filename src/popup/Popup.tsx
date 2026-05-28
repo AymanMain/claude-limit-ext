@@ -139,15 +139,10 @@ export function Popup() {
   const hasError = Boolean(usage?.lastError);
   const hasData = fh !== null || sd !== null;
 
-  // "Waiting" = session capped and reset is coming
-  const fhResetMs = msUntilReset(usage?.fiveHour.resetsAt ?? null);
-  const isWaiting = fh !== null && fh >= 95 && fhResetMs > 0;
-
-  let view: 'setup' | 'error' | 'weekly-danger' | 'waiting' | 'critical' | 'normal' = 'normal';
+  let view: 'setup' | 'error' | 'weekly-danger' | 'critical' | 'normal' = 'normal';
   if (!orgId) view = 'setup';
   else if (hasError && !hasData) view = 'error';
   else if (isWeeklyDanger(sd)) view = 'weekly-danger';
-  else if (isWaiting) view = 'waiting';
   else if (isSessionCritical(fh)) view = 'critical';
 
   return (
@@ -180,15 +175,6 @@ export function Popup() {
             onRefresh={handleRefresh}
             loading={refreshing}
             usage={usage}
-          />
-        )}
-
-        {view === 'waiting' && usage && (
-          <WaitingView
-            usage={usage}
-            onMute={handleMuteUntilReset}
-            onRefresh={handleRefresh}
-            loading={refreshing}
           />
         )}
 
@@ -227,8 +213,8 @@ function PopupHeader() {
         title="Settings"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
           <circle cx="12" cy="12" r="3" />
-          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
         </svg>
       </button>
     </div>
@@ -311,7 +297,7 @@ function ErrorView({
   );
 }
 
-function WaitingView({
+function CriticalView({
   usage,
   onMute,
   onRefresh,
@@ -328,9 +314,9 @@ function WaitingView({
   const isMaxed = fh >= 100;
 
   return (
-    <div className="view view--waiting">
+    <div className="view view--critical">
       <div className="view__title view__title--center">
-        {isMaxed ? 'Session limit reached' : 'Session nearly full'}
+        {isMaxed ? 'Session limit reached' : 'Claude session is critical'}
       </div>
 
       <RingProgress pct={fh} color="#ef4444">
@@ -343,68 +329,17 @@ function WaitingView({
           <div className="countdown__time">{formatCountdown(ms)}</div>
           <div className="countdown__label">until reset</div>
         </div>
-      ) : (
+      ) : usage.fiveHour.resetsAt ? (
         <div className="countdown-block">
           <div className="countdown__time countdown__time--reset">Resetting…</div>
         </div>
-      )}
+      ) : null}
 
       {sd !== null && (
         <div className="view__weekly-line">
           <span className={sd >= 95 ? 'text-red' : sd >= 80 ? 'text-orange' : 'text-muted'}>
             7-day: {formatPct(sd)}
           </span>
-        </div>
-      )}
-
-      <StatusFooter usage={usage} />
-
-      <div className="btn-row">
-        <button className="btn btn--ghost" onClick={onMute}>
-          Mute until reset
-        </button>
-        <button className="btn btn--primary" onClick={onRefresh} disabled={loading}>
-          {loading ? 'Refreshing…' : 'Refresh now'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function CriticalView({
-  usage,
-  onMute,
-  onRefresh,
-  loading,
-}: {
-  usage: ClaudeUsageState;
-  onMute: () => void;
-  onRefresh: () => void;
-  loading: boolean;
-}) {
-  const fh = usage.fiveHour.utilization ?? 0;
-  const sd = usage.sevenDay.utilization;
-  const ms = useCountdown(usage.fiveHour.resetsAt);
-
-  return (
-    <div className="view view--critical">
-      <div className="view__title view__title--center">Claude session is critical</div>
-
-      <RingProgress pct={fh} color="#ef4444">
-        <span className="ring-pct" style={{ color: '#ef4444' }}>{Math.round(fh)}%</span>
-        <span className="ring-label">5-hour</span>
-      </RingProgress>
-
-      {ms > 0 && (
-        <div className="countdown-block">
-          <div className="countdown__time">{formatCountdown(ms)}</div>
-          <div className="countdown__label">until reset</div>
-        </div>
-      )}
-
-      {sd !== null && sd < 95 && (
-        <div className="view__weekly-line">
-          <span className="text-muted">7-day usage: {formatPct(sd)}</span>
         </div>
       )}
 
