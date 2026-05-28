@@ -1,8 +1,8 @@
 {
-  "name": "claude-limit-tracker",
+  "name": "claude-session-tracker",
   "version": "0.1.1",
   "private": true,
-  "description": "Track Claude usage limits — 5-hour and 7-day windows with reset countdowns",
+  "description": "Track Claude usage windows, reset countdowns, and local alerts from the browser toolbar.",
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
@@ -10,7 +10,12 @@
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "package": "npm run build && cd dist && zip -r ../claude-limit-tracker.zip . && cd .."
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "package:chrome": "npm run check && node scripts/package-chrome.mjs",
+    "package:edge": "npm run check && node scripts/package-edge.mjs",
+    "package:opera": "npm run check && node scripts/package-opera.mjs",
+    "package:all": "npm run package:chrome && npm run package:edge && npm run package:opera",
+    "release:validate": "node scripts/validate-release.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -1,0 +1,39 @@
+name: Bug report
+description: Something is broken or behaving unexpectedly.
+labels: [bug]
+body:
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options: [Chrome, Edge, Brave, Opera, Other]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      placeholder: "0.1.1"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include what you expected vs what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: debug
+    attributes:
+      label: Debug panel output
+      description: Open settings → Debug → Copy debug info and paste here.
+      render: json
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I am logged into Claude in the same browser profile.
+        - label: The badge shows something (not blank).
+        - label: I tried clicking Refresh now in the popup.

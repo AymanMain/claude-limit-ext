@@ -1,0 +1,21 @@
+name: Store review issue
+description: Report a problem related to a Chrome/Edge/Opera store submission or review.
+labels: [store]
+body:
+  - type: dropdown
+    id: store
+    attributes:
+      label: Store
+      options: [Chrome Web Store, Microsoft Edge Add-ons, Opera Add-ons]
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: Review feedback or rejection reason
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Claude Limit Tracker",
+  "name": "Claude Session Tracker",
   "version": "0.1.1",
-  "description": "Track Claude usage limits — 5-hour and 7-day windows, reset countdowns, and local alerts.",
+  "description": "Track Claude usage windows, reset countdowns, and local alerts from the browser toolbar.",
   "permissions": [
     "storage",
     "notifications",

@@ -3,17 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — Claude Session Tracker</title>
+  <title>Privacy Policy — Claude Session Tracker for Microsoft Edge</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      color: #1a1a1a;
-      background: #fff;
-      padding: 2rem 1rem;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.6; color: #1a1a1a; background: #fff; padding: 2rem 1rem; }
     main { max-width: 680px; margin: 0 auto; }
     h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
     .meta { color: #666; font-size: 0.9rem; margin-bottom: 2.5rem; }
@@ -21,70 +14,39 @@
     p { margin-bottom: 0.75rem; color: #333; }
     ul { margin: 0.5rem 0 0.75rem 1.25rem; color: #333; }
     ul li { margin-bottom: 0.3rem; }
-    code {
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: 0.85em;
-      background: #f3f3f3;
-      border-radius: 3px;
-      padding: 0.1em 0.35em;
-    }
+    code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85em; background: #f3f3f3; border-radius: 3px; padding: 0.1em 0.35em; }
     a { color: #0070f3; text-decoration: none; }
     a:hover { text-decoration: underline; }
     hr { border: none; border-top: 1px solid #e5e5e5; margin: 2rem 0; }
-    .notice {
-      background: #f9f9f9;
-      border-left: 3px solid #ccc;
-      padding: 0.75rem 1rem;
-      border-radius: 0 4px 4px 0;
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 1.5rem;
-    }
+    .notice { background: #f9f9f9; border-left: 3px solid #ccc; padding: 0.75rem 1rem; border-radius: 0 4px 4px 0; font-size: 0.9rem; color: #555; margin-bottom: 1.5rem; }
   </style>
 </head>
 <body>
   <main>
     <h1>Privacy Policy</h1>
-    <p class="meta">Claude Session Tracker &mdash; Last updated: May 2026</p>
+    <p class="meta">Claude Session Tracker for Microsoft Edge &mdash; Last updated: May 2026</p>
 
     <div class="notice">
-      Claude Session Tracker is an unofficial browser extension and is not affiliated with Anthropic.
+      Claude Session Tracker is an unofficial Microsoft Edge extension and is not affiliated with Anthropic, Claude, or Microsoft.
       This policy describes how the extension handles data on your device.
     </div>
 
     <h2>Summary</h2>
-    <p>
-      All data the extension reads or stores stays on your device.
-      Nothing is sent to any server operated by this extension or any third party.
-    </p>
+    <p>All data the extension reads or stores stays on your device. Nothing is sent to any server operated by this extension or any third party.</p>
 
     <h2>What the extension reads from claude.ai</h2>
-    <p>
-      To identify your Claude organization ID, the extension runs a content script on
-      <code>https://claude.ai/*</code> pages. This script:
-    </p>
+    <p>To identify your Claude organization ID, the extension runs a content script on <code>https://claude.ai/*</code> pages. This script:</p>
     <ul>
       <li>Scans the page URL, page scripts, and anchor links for UUID-shaped strings</li>
       <li>Reads <code>localStorage</code> and <code>sessionStorage</code> on claude.ai pages and searches for UUID-shaped strings</li>
       <li>Intercepts outgoing <code>fetch</code> calls made by the claude.ai app to extract organization IDs from request URLs</li>
     </ul>
-    <p>
-      Only UUID strings matching the org ID pattern are retained. All other content
-      (page text, storage values, request bodies, response bodies) is discarded immediately
-      and never stored or transmitted.
-    </p>
+    <p>Only UUID strings matching the org ID pattern are retained. All other content is discarded immediately and never stored or transmitted.</p>
 
     <h2>What the extension requests from claude.ai</h2>
-    <p>
-      Once the organization ID is known, the extension periodically calls:
-    </p>
+    <p>Once the organization ID is known, the extension periodically calls:</p>
     <p><code>https://claude.ai/api/organizations/{orgId}/usage</code></p>
-    <p>
-      This request uses your existing browser session (<code>credentials: include</code>) — the same
-      session used when you are logged in to claude.ai. The extension does not inject,
-      read, copy, or store any cookies or session tokens. It only reads the JSON usage
-      data returned by the endpoint (usage percentages and reset timestamps).
-    </p>
+    <p>This request uses your existing browser session — the same session used when you are logged in to claude.ai in Microsoft Edge. The extension does not inject, read, copy, or store any cookies or session tokens. It only reads the JSON usage data returned by the endpoint.</p>
 
     <h2>What is stored locally</h2>
     <p>The extension stores the following in <code>chrome.storage.local</code> on your device:</p>
@@ -92,8 +54,8 @@
       <li>Your Claude organization ID</li>
       <li>Usage percentages (5-hour and 7-day windows)</li>
       <li>Reset timestamps</li>
-      <li>Extension settings (sync interval, notification thresholds, badge mode)</li>
-      <li>Notification state (which alerts have already fired, snooze state)</li>
+      <li>Extension settings</li>
+      <li>Notification state</li>
     </ul>
     <p>This data never leaves your device.</p>
 
@@ -106,10 +68,7 @@
     </ul>
 
     <h2>Third-party data sharing</h2>
-    <p>
-      No data is sent to any third-party server. The extension makes no analytics calls,
-      crash reporting requests, or telemetry requests of any kind.
-    </p>
+    <p>No data is sent to any third-party server. The extension makes no analytics calls, crash reporting requests, or telemetry requests of any kind.</p>
 
     <h2>Permissions used</h2>
     <ul>
@@ -121,19 +80,12 @@
     </ul>
 
     <h2>Data removal</h2>
-    <p>
-      All stored data can be cleared from the extension settings page under
-      <strong>Privacy &rarr; Clear all local data</strong>. Uninstalling the extension removes
-      all stored data automatically.
-    </p>
+    <p>All stored data can be cleared from the extension settings page under <strong>Privacy &rarr; Clear all local data</strong>. Uninstalling the extension removes all stored data automatically.</p>
 
     <hr />
 
     <h2>Contact</h2>
-    <p>
-      Questions or concerns:
-      <a href="https://github.com/AymanMain/claude-limit-ext/issues">github.com/AymanMain/claude-limit-ext/issues</a>
-    </p>
+    <p>Questions or concerns: <a href="https://github.com/AymanMain/claude-limit-ext/issues">github.com/AymanMain/claude-limit-ext/issues</a></p>
   </main>
 </body>
 </html>
