@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { msUntilReset, formatCountdown, formatResetDay } from '../src/core/countdown';
 
-afterEach(() => vi.useRealTimers());
+afterEach(() => { vi.useRealTimers(); });
 
 describe('msUntilReset', () => {
   it('returns 0 for null', () => {

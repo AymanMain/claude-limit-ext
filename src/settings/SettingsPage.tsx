@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { Settings, SyncInterval } from '../core/usageModel';
 import { getSettings, setSettings } from '../core/storage';
 import { SYNC_INTERVALS } from '../shared/constants';

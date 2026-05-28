@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Claude Limit Tracker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Track Claude usage limits — 5-hour and 7-day windows, reset countdowns, and local alerts.",
   "permissions": [
     "storage",
     "notifications",
     "alarms",
-    "tabs",
-    "activeTab"
+    "tabs"
   ],
   "host_permissions": [
     "https://claude.ai/*"

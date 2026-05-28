@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatPct } from '../shared/format';
 import { formatResetDay } from '../core/countdown';
 import { StatusFooter } from './StatusFooter';

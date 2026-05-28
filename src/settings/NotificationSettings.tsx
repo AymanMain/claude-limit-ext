@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Settings } from '../core/usageModel';
 
 type Props = {

@@ -45,14 +45,18 @@ function scanFromStorage(): string[] {
       if (!key) continue;
       uuids.push(...extractUUIDs(localStorage.getItem(key) ?? ''));
     }
-  } catch {}
+  } catch {
+    // localStorage inaccessible in restricted browsing contexts
+  }
   try {
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
       if (!key) continue;
       uuids.push(...extractUUIDs(sessionStorage.getItem(key) ?? ''));
     }
-  } catch {}
+  } catch {
+    // sessionStorage inaccessible in restricted browsing contexts
+  }
   return [...new Set(uuids)];
 }
 
@@ -61,7 +65,9 @@ function scanFromWindowData(): string[] {
   try {
     const nextData = (window as unknown as Record<string, unknown>).__NEXT_DATA__;
     if (nextData) uuids.push(...extractUUIDs(JSON.stringify(nextData)));
-  } catch {}
+  } catch {
+    // __NEXT_DATA__ access may throw in sandboxed contexts
+  }
   return [...new Set(uuids)];
 }
 

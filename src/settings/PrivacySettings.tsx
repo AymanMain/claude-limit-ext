@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { clearOrgId, clearAllData, getUsageState, getSettings } from '../core/storage';
 import { STORAGE_KEY_HISTORY } from '../shared/constants';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getOrgId, getUsageState, getSettings } from '../core/storage';
 import { formatAgeLabel } from '../core/freshness';
 import type { ClaudeUsageState } from '../core/usageModel';

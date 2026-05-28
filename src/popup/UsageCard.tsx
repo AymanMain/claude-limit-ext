@@ -1,4 +1,3 @@
-import React from 'react';
 import type { UsageWindow } from '../core/usageModel';
 import { msUntilReset, formatCountdown, formatResetDay } from '../core/countdown';
 import { formatPct } from '../shared/format';

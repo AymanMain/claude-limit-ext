@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ClaudeUsageState } from '../core/usageModel';
 import { getFreshness, formatAgeLabel, sourceLabel } from '../core/freshness';
 
